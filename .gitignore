@@ -4,6 +4,7 @@
 #
 
 config.ini
+.vscode
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

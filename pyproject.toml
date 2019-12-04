@@ -6,10 +6,15 @@ authors = ["Tyler Neuenschwander <tcn@producepro.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
+trakt = "^2.12"
+python-telegram-bot = "^12.2"
+
+[tool.poetry.scripts]
+mediaman = "mediaman.main:main"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
-
+black = {version = "^18.3-alpha.0", allows-prereleases = true}
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
