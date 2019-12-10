@@ -14,6 +14,7 @@ def main():
     trakt.update_watchlist(imdb.watchlist)
     trakt.cleanup_watchlist()
     trakt.update_collect()
+    trakt.list_collect()
 
     return
 

@@ -1,4 +1,3 @@
-
 import sys
 import logging
 import configparser
@@ -7,8 +6,8 @@ import trakt
 from trakt.movies import Movie
 from trakt.users import User
 
-class TraktService:
 
+class TraktService:
     def __init__(self):
         self.logger = logging.getLogger(__name__ + ".trakt_service")
 
@@ -72,7 +71,7 @@ class TraktService:
             msg += "\n".join(movies_watched)
 
         self.logger.info(msg)
-        
+
         return True
 
     def cleanup_watchlist(self):
@@ -102,7 +101,6 @@ class TraktService:
             msg += "\n".join(movies_removed)
 
         self.logger.info(msg)
-
 
     def update_collect(self):
         self.logger.info("Update collect")
@@ -165,3 +163,18 @@ class TraktService:
             msg += "\n".join(movies_unmarked)
 
         self.logger.info(msg)
+
+    def list_collect(self):
+        collect_list = User(self.__username__).get_list("Collect")
+
+        list_movies = "Collect PTP Links:\n"
+        for i in collect_list.get_items():
+            if i.media_type == "movies":
+                if i.released == False:
+                    continue
+                else:
+                    ptp_query = f"https://passthepopcorn.me/torrents.php?order_by=relevance&searchstr={i.imdb}"
+                    movie_msg = f"{i.title} ({i.year}) {ptp_query}\n"
+                    list_movies += movie_msg
+        self.logger.info(list_movies)
+
