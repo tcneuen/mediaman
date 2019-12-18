@@ -165,16 +165,21 @@ class TraktService:
         self.logger.info(msg)
 
     def list_collect(self):
+        import datetime
         collect_list = User(self.__username__).get_list("Collect")
 
+        now = datetime.datetime.now()
+        
         list_movies = "Collect PTP Links:\n"
         for i in collect_list.get_items():
-            if i.media_type == "movies":
-                if i.released == False:
-                    continue
-                else:
-                    ptp_query = f"https://passthepopcorn.me/torrents.php?order_by=relevance&searchstr={i.imdb}"
-                    movie_msg = f"{i.title} ({i.year}) {ptp_query}\n"
-                    list_movies += movie_msg
+            if i.media_type != "movies" or i.released == None:
+                continue
+            rel_year = int(i.released[0:4])
+            if rel_year > now.year:
+                continue
+            else:
+                ptp_query = f"https://passthepopcorn.me/torrents.php?order_by=relevance&searchstr={i.imdb}"
+                movie_msg = f"{i.title} ({i.year}) {ptp_query}\n"
+                list_movies += movie_msg
         self.logger.info(list_movies)
 
