@@ -11,9 +11,9 @@ def main():
     trakt = TraktService()
     imdb = ImdbWatchlist()
 
-    trakt.update_watchlist(imdb.watchlist)
-    trakt.cleanup_watchlist()
-    trakt.update_collect()
+    # trakt.update_watchlist(imdb.watchlist)
+    # trakt.cleanup_watchlist()
+    # trakt.update_collect()
     trakt.list_collect()
 
     return

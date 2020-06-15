@@ -13,6 +13,7 @@ class TraktService:
 
         config = configparser.ConfigParser()
         config.read("config.ini")
+        trakt.core.AUTH_METHOD = trakt.core.OAUTH_AUTH
         trakt.core.OAUTH_TOKEN = config["media.trakt"]["OAUTH_TOKEN"]
         trakt.core.CLIENT_ID = config["media.trakt"]["CLIENT_ID"]
         trakt.core.CLIENT_SECRET = config["media.trakt"]["CLIENT_SECRET"]
@@ -24,7 +25,7 @@ class TraktService:
         """
         if not movie_list:
             return False
-        self.logger.info(f"Update watchlist")
+        self.logger.info("Update watchlist")
 
         # Get trakt watchlist
         trakt_list = [m.imdb for m in User(self.__username__).watchlist_movies]
@@ -166,13 +167,17 @@ class TraktService:
 
     def list_collect(self):
         import datetime
+
         collect_list = User(self.__username__).get_list("Collect")
 
         now = datetime.datetime.now()
-        
+
         list_movies = "Collect PTP Links:\n"
+        movie_list = set()
         for i in collect_list.get_items():
-            if i.media_type != "movies" or i.released == None:
+            if i.media_type != "movies":
+                continue
+            if i.released is None:
                 continue
             rel_year = int(i.released[0:4])
             if rel_year > now.year:
@@ -180,6 +185,7 @@ class TraktService:
             else:
                 ptp_query = f"https://passthepopcorn.me/torrents.php?order_by=relevance&searchstr={i.imdb}"
                 movie_msg = f"{i.title} ({i.year}) {ptp_query}\n"
-                list_movies += movie_msg
+                movie_list.add(movie_msg)
+        for m in movie_list:
+            list_movies += m
         self.logger.info(list_movies)
-
