@@ -5,6 +5,7 @@ import configparser
 import trakt
 from trakt.movies import Movie
 from trakt.users import User
+from trakt.errors import OAuthException, ForbiddenException
 
 
 class TraktService:
@@ -14,15 +15,17 @@ class TraktService:
         config = configparser.ConfigParser()
         config.read("config.ini")
         trakt.core.AUTH_METHOD = trakt.core.OAUTH_AUTH
-        trakt.core.CLIENT_ID = config["trakt"]["CLIENT_ID"]
-        trakt.core.CLIENT_SECRET = config["trakt"]["CLIENT_SECRET"]
         self.__username__ = "tcneuen"
-        trakt.core.init(
-            self.__username__,
-            client_id=config["trakt"]["CLIENT_ID"],
-            client_secret=config["trakt"]["CLIENT_SECRET"],
-            store=True,
-        )
+        try:
+            self.user = User(self.__username__)
+        except (OAuthException, ForbiddenException):
+            trakt.core.init(
+                self.__username__,
+                client_id=config["trakt"]["CLIENT_ID"],
+                client_secret=config["trakt"]["CLIENT_SECRET"],
+                store=True,
+            )
+            self.user = User(self.__username__)
 
     def update_watchlist(self, movie_list: list) -> bool:
         """
@@ -33,8 +36,8 @@ class TraktService:
         self.logger.info("Update watchlist")
 
         # Get trakt watchlist
-        trakt_list = [m.imdb for m in User(self.__username__).watchlist_movies]
-        watched = [m.imdb for m in User(self.__username__).watched_movies]
+        trakt_list = [m.imdb for m in self.user.watchlist_movies]
+        watched = [m.imdb for m in self.user.watched_movies]
         self.logger.debug(f"Trakt Watchlist: {len(trakt_list)} movies found.")
 
         # Compare movies and add missing to trakt
@@ -45,6 +48,8 @@ class TraktService:
         add_movies = set(diff_movies).difference(watched)
         movies_added = []
         for m in add_movies:
+            if m is None:
+                continue
             try:
                 movie = Movie(m)
                 self.logger.debug(f"added {movie.imdb} {movie.title}")
@@ -85,8 +90,8 @@ class TraktService:
         Remove watched movies from watchlist
         """
         self.logger.info("Cleanup watchlist")
-        watchlist = [m.imdb for m in User(self.__username__).watchlist_movies]
-        watched = [m.imdb for m in User(self.__username__).watched_movies]
+        watchlist = [m.imdb for m in self.user.watchlist_movies]
+        watched = [m.imdb for m in self.user.watched_movies]
         watched_movies = set(watchlist).intersection(watched)
 
         movies_removed = []
@@ -110,17 +115,17 @@ class TraktService:
 
     def update_collect(self):
         self.logger.info("Update collect")
-        watchlist = [m.imdb for m in User(self.__username__).watchlist_movies]
-        collected = [m.imdb for m in User(self.__username__).movie_collection]
-        watched = [m.imdb for m in User(self.__username__).watched_movies]
+        watchlist = [m.imdb for m in self.user.watchlist_movies]
+        collected = [m.imdb for m in self.user.movie_collection]
+        watched = [m.imdb for m in self.user.watched_movies]
         collect = list(set(watched + watchlist))
 
-        collect_list = User(self.__username__).get_list("Collect")
+        collect_list = self.user.get_list("Collect")
 
         list_movies = []
         for i in collect_list.get_items():
             if i.media_type == "movies":
-                if i.released == False:
+                if i.released is False:
                     collect_list.remove_items(i)
                     self.logger.debug(f"unmarked {i.title} ({i.year})")
                 else:
@@ -136,7 +141,7 @@ class TraktService:
         for m in collect_movies:
             try:
                 movie = Movie(m)
-                if movie.released == False:
+                if movie.released is False:
                     continue
                 # if movie.ratings["rating"] < 6:
                 #     continue
@@ -173,7 +178,7 @@ class TraktService:
     def list_collect(self):
         import datetime
 
-        collect_list = User(self.__username__).get_list("Collect")
+        collect_list = self.user.get_list("Collect")
 
         now = datetime.datetime.now()
 
