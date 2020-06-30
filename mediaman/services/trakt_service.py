@@ -14,10 +14,15 @@ class TraktService:
         config = configparser.ConfigParser()
         config.read("config.ini")
         trakt.core.AUTH_METHOD = trakt.core.OAUTH_AUTH
-        trakt.core.OAUTH_TOKEN = config["media.trakt"]["OAUTH_TOKEN"]
-        trakt.core.CLIENT_ID = config["media.trakt"]["CLIENT_ID"]
-        trakt.core.CLIENT_SECRET = config["media.trakt"]["CLIENT_SECRET"]
+        trakt.core.CLIENT_ID = config["trakt"]["CLIENT_ID"]
+        trakt.core.CLIENT_SECRET = config["trakt"]["CLIENT_SECRET"]
         self.__username__ = "tcneuen"
+        trakt.core.init(
+            self.__username__,
+            client_id=config["trakt"]["CLIENT_ID"],
+            client_secret=config["trakt"]["CLIENT_SECRET"],
+            store=True,
+        )
 
     def update_watchlist(self, movie_list: list) -> bool:
         """

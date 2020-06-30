@@ -3,7 +3,6 @@ name = "mediaman"
 version = "0.1.0"
 description = ""
 authors = ["Tyler Neuenschwander <tcn@producepro.com>"]
-readme = README.md
 
 [tool.poetry.dependencies]
 python = "^3.6"
