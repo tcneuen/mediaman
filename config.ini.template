@@ -1,6 +1,6 @@
 [bot]
 API_TOKEN =
 
-[media.trakt]
+[trakt]
 CLIENT_ID = 
 CLIENT_SECRET =
