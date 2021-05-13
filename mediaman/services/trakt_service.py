@@ -1,11 +1,12 @@
-import sys
-import logging
 import configparser
+import logging
+import sys
+from datetime import time
 
 import trakt
+from trakt.errors import ForbiddenException, OAuthException
 from trakt.movies import Movie
 from trakt.users import User
-from trakt.errors import OAuthException, ForbiddenException
 
 
 class TraktService:
@@ -54,6 +55,7 @@ class TraktService:
                 movie = Movie(m)
                 self.logger.debug(f"added {movie.imdb} {movie.title}")
                 movie.add_to_watchlist()
+                time.sleep(1)
                 movies_added.append(f" + {movie.title} ({movie.year})")
             except:
                 self.logger.warning(f"{m} NOT FOUND")
@@ -100,6 +102,7 @@ class TraktService:
                 movie = Movie(m)
                 self.logger.debug(f"removed {movie.imdb} {movie.title}")
                 movie.remove_from_watchlist()
+                time.sleep(1)
                 movies_removed.append(f" - {movie.title} ({movie.year})")
             except:
                 self.logger.warning(f"{m} NOT FOUND")
@@ -147,6 +150,8 @@ class TraktService:
                 #     continue
                 self.logger.debug(f"marked {movie.imdb} {movie.title}")
                 collect_list.add_items(movie)
+                time.sleep(1)
+
                 movies_marked.append(f" + {movie.title} ({movie.year})")
             except:
                 self.logger.error(sys.exc_info()[0])
@@ -165,6 +170,8 @@ class TraktService:
                     f'unmarked {movie.imdb} {movie.title} {movie.ratings["rating"]}'
                 )
                 collect_list.remove_items(movie)
+                time.sleep(1)
+
                 movies_unmarked.append(f" - {movie.title} ({movie.year})")
             except:
                 self.logger.error(sys.exc_info()[0])
