@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mediaman"
-version = "1.0.1"
+version = "1.0.2"
 description = ""
 authors = ["Tyler Neuenschwander <tcneuen@gmail.com>"]
 
