@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "mediaman"
-version = "1.1.0"
+version = "1.2.0"
 description = ""
 authors = ["Tyler Neuenschwander <tcneuen@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.9"
 typer = "^0.2.1"
-trakt = "^3.2.1"
+pytrakt = "^3.4.24"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.8.3"

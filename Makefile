@@ -17,7 +17,7 @@ all: setup build
 
 .PHONY: setup
 setup:
-	poetry install --remove-untracked
+	poetry install --sync
 build: $(PEX_FILE)
 
 $(PEX_FILE): mediaman/*.py requirements.txt

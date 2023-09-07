@@ -1,7 +1,6 @@
 import configparser
 import logging
-import sys
-from datetime import time
+import time
 
 import trakt
 from trakt.errors import ForbiddenException, OAuthException
@@ -51,14 +50,14 @@ class TraktService:
         for m in add_movies:
             if m is None:
                 continue
-            try:
-                movie = Movie(m)
-                self.logger.debug(f"added {movie.imdb} {movie.title}")
-                movie.add_to_watchlist()
-                time.sleep(1)
-                movies_added.append(f" + {movie.title} ({movie.year})")
-            except:
-                self.logger.warning(f"{m} NOT FOUND")
+            # try:
+            movie = Movie(m)
+            self.logger.debug(f"added {movie.imdb} {movie.title}")
+            movie.add_to_watchlist()
+            time.sleep(1)
+            movies_added.append(f" + {movie.title} ({movie.year})")
+            # except trakt.errors.NotFoundException:
+            #     self.logger.warning(f"{m} NOT FOUND")
 
         msg = "Update watchlist COMPLETE:\n"
         if len(add_movies) == 0:
@@ -72,11 +71,13 @@ class TraktService:
         imdb_watched = set(movie_list).intersection(watched)
         self.logger.debug(f"{len(imdb_watched)} movies watched on IMDB list")
         for m in imdb_watched:
+            if m is None:
+                continue
             try:
                 movie = Movie(m)
                 self.logger.debug(f"watched {movie.imdb} {movie.title}")
                 movies_watched.append(f" - {movie.title} ({movie.year})")
-            except:
+            except trakt.errors.NotFoundException:
                 self.logger.warning(f"{m} NOT FOUND")
 
         if len(movies_watched) != 0:
@@ -98,13 +99,15 @@ class TraktService:
 
         movies_removed = []
         for m in watched_movies:
+            if m is None:
+                continue
             try:
                 movie = Movie(m)
                 self.logger.debug(f"removed {movie.imdb} {movie.title}")
                 movie.remove_from_watchlist()
                 time.sleep(1)
                 movies_removed.append(f" - {movie.title} ({movie.year})")
-            except:
+            except trakt.errors.NotFoundException:
                 self.logger.warning(f"{m} NOT FOUND")
 
         msg = "Cleanup watchlist COMPLETE:\n"
@@ -142,19 +145,21 @@ class TraktService:
 
         movies_marked = []
         for m in collect_movies:
-            try:
-                movie = Movie(m)
-                if movie.released is False:
-                    continue
-                # if movie.ratings["rating"] < 6:
-                #     continue
-                self.logger.debug(f"marked {movie.imdb} {movie.title}")
-                collect_list.add_items(movie)
-                time.sleep(1)
+            if m is None:
+                continue
+            # try:
+            movie = Movie(m)
+            if movie.released is False:
+                continue
+            # if movie.ratings["rating"] < 6:
+            #     continue
+            self.logger.debug(f"marked {movie.imdb} {movie.title}")
+            collect_list.add_items(movie)
+            time.sleep(1)
 
-                movies_marked.append(f" + {movie.title} ({movie.year})")
-            except:
-                self.logger.error(sys.exc_info()[0])
+            movies_marked.append(f" + {movie.title} ({movie.year})")
+            # except:
+            #     self.logger.error(sys.exc_info()[0])
 
         msg = "Update collect COMPLETE:\n"
         msg += f"{len(movies_marked)} movies marked for collection\n"
@@ -164,19 +169,18 @@ class TraktService:
         movies_unmarked = []
         collected_movies = set(collected).intersection(list_movies)
         for m in collected_movies:
-            try:
-                movie = Movie(m)
-                self.logger.debug(
-                    f'unmarked {movie.imdb} {movie.title} {movie.ratings["rating"]}'
-                )
-                collect_list.remove_items(movie)
-                time.sleep(1)
+            if m is None:
+                continue
+            movie = Movie(m)
+            self.logger.debug(
+                f'unmarked {movie.imdb} {movie.title} {movie.ratings["rating"]}'
+            )
+            collect_list.remove_items(movie)
+            time.sleep(1)
 
-                movies_unmarked.append(f" - {movie.title} ({movie.year})")
-            except:
-                self.logger.error(sys.exc_info()[0])
+            movies_unmarked.append(f" - {movie.title} ({movie.year})")
 
-        msg += f"\n\n{len(movies_unmarked)} movies unmarked\n"
+        msg += f"\n{len(movies_unmarked)} movies unmarked\n"
         if len(movies_unmarked) != 0:
             msg += "\n".join(movies_unmarked)
 
